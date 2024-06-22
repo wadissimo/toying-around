@@ -4,6 +4,7 @@ import torch.nn as nn
 from torch.nn import functional as F
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
+print("device", device)
 data_file = "data/input.txt"
 
 
@@ -27,8 +28,18 @@ split = int(0.9*len(data))
 train_data = data[:split]
 val_data = data[split:]
 
-batch_size = 4
-block_size = 8
+
+#### Params 
+batch_size = 64
+block_size = 256
+learning_iters = 5000
+eval_interval = 500
+lr = 3e-4
+eval_iters = 100
+embed_size=384
+n_layers = 6
+n_heads = 6
+dropout = 0.2
 
 def get_batch(split):
     # generate a small batch of data of inputs x and targets y
@@ -38,14 +49,89 @@ def get_batch(split):
     y = torch.stack([data[i+1:i+block_size+1] for i in ix])
     return x, y
 
+class Head(nn.Module):
+
+    def __init__(self, head_size):
+        super().__init__()
+        self.key = nn.Linear(embed_size, head_size, bias=False)
+        self.query = nn.Linear(embed_size, head_size, bias=False)
+        self.value = nn.Linear(embed_size, head_size, bias=False)
+        self.register_buffer('tril', torch.tril(torch.ones(block_size, block_size)))
+        self.dropout = nn.Dropout(dropout)
+    
+    def forward(self, x):
+        B,T,C = x.shape
+        k = self.key(x) # B,T,H
+        q = self.query(x) #  B,T,H
+        v = self.value(x) #  B,T,H
+        wei = q @ k.transpose(-2,-1) * C**-0.5 # B,T,T
+        wei = wei.masked_fill(self.tril[:T, :T] == 0, float("-inf")) # lower triangular
+        wei = F.softmax(wei, dim= -1) # B,T,T
+        wei = self.dropout(wei)
+        out = wei @ v # B,T,H
+        return out
+
+class MultiHeadAttention(nn.Module):
+    def __init__(self, num_heads, head_size):
+        super().__init__()
+        self.heads =  nn.ModuleList([Head(head_size) for _ in range(num_heads)])
+        self.proj = nn.Linear(embed_size, embed_size)
+        self.dropout = nn.Dropout(dropout)
+    
+    def forward(self, x):
+        out = torch.cat([h(x) for h in self.heads], dim = -1)
+        out = self.proj(out)
+        out = self.dropout(out)
+        return out
+
+# Feed Forward N->N
+class FeedForward(nn.Module):
+    def __init__(self, embed_size):
+        super().__init__()
+        self.ff = nn.Sequential(
+            nn.Linear(embed_size, 4*embed_size),
+            nn.ReLU(),
+            nn.Linear(4*embed_size, embed_size),
+            nn.Dropout(dropout),
+        )
+    
+    def forward(self, x):
+        return self.ff(x)
+    
+
+class Block(nn.Module):
+    def __init__(self, embed_size, n_heads):
+        super().__init__()
+        self.att_head = MultiHeadAttention(n_heads, embed_size//n_heads) ##Head(embed_size)
+        self.ffwd = FeedForward(embed_size)
+        self.ln1 = nn.LayerNorm(embed_size)
+        self.ln2 = nn.LayerNorm(embed_size)
+    
+    def forward(self, x):
+        x = x + self.att_head(self.ln1(x))
+        x = x + self.ffwd(self.ln2(x))
+        return x
+        
 
 class BigramLanguageModel(nn.Module):
-    def __init__(self, vocab_size):
+    def __init__(self):
         super().__init__()
-        self.token_embedding_table = nn.Embedding(vocab_size, vocab_size)
+        self.token_embedding_table = nn.Embedding(vocab_size, embed_size)
+        self.pos_embedding_table = nn.Embedding(block_size, embed_size)
+        self.blocks = nn.Sequential(*[Block(embed_size, n_heads) for _ in range(n_layers)])
+        self.ln1 = nn.LayerNorm(embed_size)
+        self.lin_head = nn.Linear(embed_size, vocab_size)
 
     def forward(self, idx, targets=None):
-        logits = self.token_embedding_table(idx)
+        B,T = idx.shape
+
+        tok_emb = self.token_embedding_table(idx) # B,T,C . C=embed_size
+        pos_emb = self.pos_embedding_table(torch.arange(T, device=device))
+        x = tok_emb + pos_emb
+        x = self.blocks(x)
+        x = self.ln1(x)
+        logits = self.lin_head(x)
+
         if targets is None:
             loss = None
         else:
@@ -57,29 +143,49 @@ class BigramLanguageModel(nn.Module):
 
     def generate(self, idx, max_new_tokens):
         for _ in range(max_new_tokens):
-            logits, loss = self(idx)
+            idx_crop = idx[:, -block_size:]
+            logits, loss = self(idx_crop)
             logits = logits[:,-1,:]
             probs = F.softmax(logits, dim=-1)
             idx_next = torch.multinomial(probs, num_samples=1)
             idx = torch.cat((idx,idx_next), dim=1)
         return idx
-            
+
+
+
+@torch.no_grad()
+def eval_loss(model):
+    res = {}
+    model.eval()
+    for split in ["train", "val"]:
+        losses = torch.zeros(eval_iters)
+        for k in range(eval_iters):
+            x,y = get_batch(split)
+            logits, loss = model(x,y)
+            losses[k] = loss.item()
+        res[split] = losses.mean()
+    model.train()
+    return res
         
-m = BigramLanguageModel(vocab_size)
-m = m.to(device)
+model = BigramLanguageModel()
+model = model.to(device)
 data = data.to(device)
 train_data = train_data.to(device)
 val_data = val_data.to(device)
-optimizer = torch.optim.AdamW(m.parameters(), lr=1e-3)
-batch_size=32
+optimizer = torch.optim.AdamW(model.parameters(), lr=lr)
 
-for steps in range(10000):
+print("Start training")
+for steps in range(learning_iters):
+
     xb, yb = get_batch('train')
-    logits, loss = m(xb,yb)
+    logits, loss = model(xb,yb)
     optimizer.zero_grad(set_to_none=True)
     loss.backward()
     optimizer.step()
+    if steps % eval_interval == 0:
+        losses = eval_loss(model)
+        print(f"step: {steps}, train loss: {losses['train']:.4f}, val loss: {losses['val']:.4f}")
 
-print("Loss:", loss.item())
+#print("final Loss:", loss.item())
 print("Output:")
-print(decode(m.generate(torch.zeros((1,1),dtype=torch.long).to(device), max_new_tokens=100)[0].tolist()))
+print(decode(model.generate(torch.zeros((1,1),dtype=torch.long).to(device), max_new_tokens=5000)[0].tolist()))
