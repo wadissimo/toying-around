@@ -10,3 +10,4 @@ Currently, two official plugins are available:
 Installation:
 
 npm install eslint vite-plugin-eslint eslint-config-react-app --save-dev
+npm install json-server
