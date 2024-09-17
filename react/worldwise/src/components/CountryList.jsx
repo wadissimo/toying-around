@@ -16,7 +16,7 @@ export default function CountryList({ cities, isLoading }) {
 
   const { countries } = cities.reduce(
     (arr, city) => {
-      if (arr.countries.includes(city.country)) {
+      if (arr.uniqueCountries.includes(city.country)) {
         return arr;
       } else {
         arr.uniqueCountries = [...arr.uniqueCountries];
@@ -35,7 +35,7 @@ export default function CountryList({ cities, isLoading }) {
   return (
     <ul className={styles.countryList}>
       {countries.map((country) => (
-        <CountryItem country={country} key={country} />
+        <CountryItem country={country} key={country.country} />
       ))}
     </ul>
   );
