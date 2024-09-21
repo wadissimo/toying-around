@@ -10,7 +10,7 @@
         "lat": 38.727881642324164,
         "lng": -9.140900099907554
       },
-      "id": 73930385
+      "id": "73930385"
     },
     {
       "cityName": "Madrid",
@@ -22,7 +22,7 @@
         "lat": 40.46635901755316,
         "lng": -3.7133789062500004
       },
-      "id": 17806751
+      "id": "17806751"
     },
     {
       "cityName": "Berlin",
@@ -34,7 +34,67 @@
         "lat": 52.53586782505711,
         "lng": 13.376933665713324
       },
-      "id": 98443197
+      "id": "98443197"
+    },
+    {
+      "id": "a53c",
+      "cityName": "Hofheim am Taunus",
+      "country": "Germany",
+      "emoji": "🇩🇪",
+      "date": "2024-09-21T06:14:39.736Z",
+      "notes": "aaaaa",
+      "position": {
+        "lat": "50.08512410541493",
+        "lng": "8.44505310058594"
+      }
+    },
+    {
+      "id": "078f",
+      "cityName": "Hofheim am Taunus",
+      "country": "Germany",
+      "emoji": "🇩🇪",
+      "date": "2024-09-21T06:20:09.811Z",
+      "notes": "",
+      "position": {
+        "lat": "50.08512410541493",
+        "lng": "8.44505310058594"
+      }
+    },
+    {
+      "id": "6a3d",
+      "cityName": "Frankfurt am Main",
+      "country": "Germany",
+      "emoji": "🇩🇪",
+      "date": "2024-09-21T06:20:33.381Z",
+      "notes": "",
+      "position": {
+        "lat": "50.1241000426924",
+        "lng": "8.723144531250002"
+      }
+    },
+    {
+      "id": "0692",
+      "cityName": "Schwalbach am Taunus",
+      "country": "Germany",
+      "emoji": "🇩🇪",
+      "date": "2024-09-21T06:21:24.847Z",
+      "notes": "",
+      "position": {
+        "lat": "50.14962639292665",
+        "lng": "8.532085418701174"
+      }
+    },
+    {
+      "id": "7f3b",
+      "cityName": "Moscow",
+      "country": "Russian Federation (the)",
+      "emoji": "🇷🇺",
+      "date": "2024-08-01T06:25:27.000Z",
+      "notes": "ru",
+      "position": {
+        "lat": "55.677584411089526",
+        "lng": "37.57324218750001"
+      }
     }
   ]
 }
