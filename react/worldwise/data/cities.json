@@ -37,30 +37,6 @@
       "id": "98443197"
     },
     {
-      "id": "a53c",
-      "cityName": "Hofheim am Taunus",
-      "country": "Germany",
-      "emoji": "🇩🇪",
-      "date": "2024-09-21T06:14:39.736Z",
-      "notes": "aaaaa",
-      "position": {
-        "lat": "50.08512410541493",
-        "lng": "8.44505310058594"
-      }
-    },
-    {
-      "id": "078f",
-      "cityName": "Hofheim am Taunus",
-      "country": "Germany",
-      "emoji": "🇩🇪",
-      "date": "2024-09-21T06:20:09.811Z",
-      "notes": "",
-      "position": {
-        "lat": "50.08512410541493",
-        "lng": "8.44505310058594"
-      }
-    },
-    {
       "id": "6a3d",
       "cityName": "Frankfurt am Main",
       "country": "Germany",
