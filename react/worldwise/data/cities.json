@@ -71,6 +71,54 @@
         "lat": "55.677584411089526",
         "lng": "37.57324218750001"
       }
+    },
+    {
+      "id": "5e7d",
+      "cityName": "Paris",
+      "country": "France",
+      "emoji": "🇫🇷",
+      "date": "2024-09-02T06:53:59.000Z",
+      "notes": "",
+      "position": {
+        "lat": "48.83579746243093",
+        "lng": "2.3620605468750004"
+      }
+    },
+    {
+      "id": "24ec",
+      "cityName": "Konigstein im Taunus",
+      "country": "Germany",
+      "emoji": "🇩🇪",
+      "date": "2024-09-21T06:56:57.602Z",
+      "notes": "",
+      "position": {
+        "lat": "50.179756353775375",
+        "lng": "8.460159301757814"
+      }
+    },
+    {
+      "id": "18ac",
+      "cityName": "London",
+      "country": "United Kingdom of Great Britain and Northern Ireland (the)",
+      "emoji": "🇬🇧",
+      "date": "2024-09-21T13:38:19.258Z",
+      "notes": "adssad",
+      "position": {
+        "lat": "51.45400691005982",
+        "lng": "-0.26367187500000006"
+      }
+    },
+    {
+      "id": "52ff",
+      "cityName": "New York City",
+      "country": "United States of America (the)",
+      "emoji": "🇺🇸",
+      "date": "2024-09-21T13:38:56.698Z",
+      "notes": "",
+      "position": {
+        "lat": "40.711873951908125",
+        "lng": "-73.94897460937501"
+      }
     }
   ]
 }
